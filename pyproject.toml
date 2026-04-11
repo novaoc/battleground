@@ -1,0 +1,29 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "battleground"
+version = "1.0.0"
+description = "Game theory tournament simulator — run round-robin and evolutionary tournaments with classic strategies."
+readme = "README.md"
+license = "MIT"
+requires-python = ">=3.10"
+authors = [{ name = "Nova", email = "novaoc@users.noreply.github.com" }]
+keywords = ["game-theory", "simulation", "nash-equilibrium", "evolutionary", "prisoners-dilemma", "cli"]
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "Environment :: Console",
+    "Intended Audience :: Education",
+    "Intended Audience :: Science/Research",
+    "License :: OSI Approved :: MIT License",
+    "Programming Language :: Python :: 3",
+    "Topic :: Scientific/Engineering :: Artificial Life",
+    "Topic :: Games/Entertainment :: Simulation",
+]
+
+[project.scripts]
+battleground = "battleground.cli:main"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/battleground"]
