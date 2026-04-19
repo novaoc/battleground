@@ -291,6 +291,37 @@ class Handshake(Strategy):
         return Action.DEFECT
 
 
+class Tester(Strategy):
+    name = "Tester"
+    description = "Cooperates for 3 rounds to probe, then plays Tit-for-Tat. Exploits very forgiving opponents."
+    author = "Novel"
+
+    def play(self, round_num: int) -> Action:
+        if round_num < 3:
+            return Action.COOPERATE
+        # After 3 rounds, check if opponent always cooperated — exploit
+        if all(a == Action.COOPERATE for a in self.their_actions):
+            return Action.DEFECT
+        # Otherwise, Tit-for-Tat
+        return self.their_actions[-1]
+
+
+class Lookahead(Strategy):
+    name = "Lookahead"
+    description = "Like Tit-for-Tat but checks last 3 rounds. Defects only if majority defected. Resists noise."
+    author = "Novel"
+
+    def play(self, round_num: int) -> Action:
+        if round_num == 0:
+            return Action.COOPERATE
+        window = min(3, len(self.their_actions))
+        recent = self.their_actions[-window:]
+        defections = sum(1 for a in recent if a == Action.DEFECT)
+        if defections > window // 2:
+            return Action.DEFECT
+        return Action.COOPERATE
+
+
 # --- Registry ---
 
 ALL_STRATEGIES: list[type[Strategy]] = [
@@ -310,6 +341,8 @@ ALL_STRATEGIES: list[type[Strategy]] = [
     Adaptive,
     Pavlov,
     Handshake,
+    Tester,
+    Lookahead,
 ]
 
 STRATEGY_MAP: dict[str, type[Strategy]] = {s.name: s for s in ALL_STRATEGIES}

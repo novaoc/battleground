@@ -97,6 +97,12 @@ Examples:
         action="store_true",
         help="Output results as JSON",
     )
+    parser.add_argument(
+        "-s", "--seed",
+        type=int,
+        default=None,
+        help="Random seed for reproducible results (default: random)",
+    )
 
     args = parser.parse_args()
 
@@ -133,11 +139,21 @@ Examples:
             population_size=args.population,
             rounds_per_match=args.rounds,
             noise=args.noise,
+            seed=args.seed,
         )
 
         if args.json:
             import json
-            print(json.dumps(history, indent=2, default=str))
+            data = {
+                "game": args.game,
+                "generations": args.generations,
+                "population_size": args.population,
+                "rounds_per_match": args.rounds,
+                "noise": args.noise,
+                "seed": args.seed,
+                "history": history,
+            }
+            print(json.dumps(data, indent=2, default=str))
         else:
             display_evolution(history)
     else:
@@ -151,6 +167,7 @@ Examples:
             strategy_names=strat_names,
             rounds=args.rounds,
             noise=args.noise,
+            seed=args.seed,
         )
 
         if args.json:
@@ -159,6 +176,7 @@ Examples:
                 "game": args.game,
                 "rounds": args.rounds,
                 "noise": args.noise,
+                "seed": args.seed,
                 "rankings": [
                     {
                         "rank": i + 1,

@@ -102,9 +102,13 @@ def run_tournament(
     strategy_names: list[str] | None = None,
     rounds: int = 200,
     noise: float = 0.0,
+    seed: int | None = None,
 ) -> tuple[list[StrategyStats], list[MatchResult]]:
     """Run a round-robin tournament. Returns ranked stats and all match results."""
     from .strategies import STRATEGY_MAP
+
+    if seed is not None:
+        random.seed(seed)
 
     if strategy_names:
         classes = [STRATEGY_MAP[n] for n in strategy_names]
@@ -169,9 +173,13 @@ def run_evolutionary(
     population_size: int = 100,
     rounds_per_match: int = 50,
     noise: float = 0.0,
+    seed: int | None = None,
 ) -> list[dict]:
     """Run an evolutionary tournament — strategies replicate based on fitness."""
     from .strategies import STRATEGY_MAP
+
+    if seed is not None:
+        random.seed(seed)
 
     if strategy_names:
         classes = [STRATEGY_MAP[n] for n in strategy_names]

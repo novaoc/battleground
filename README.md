@@ -81,6 +81,13 @@ battleground --strategies "Tit-for-Tat,Defector,Cooperator,Grim Trigger"
 battleground --json | jq '.rankings[0]'
 ```
 
+### Reproducible results
+
+```bash
+battleground -s 42                # Same seed = same results
+battleground --evolve -s 123      # Reproducible evolutionary tournament
+```
+
 ## Games
 
 | Game | Description |
@@ -91,7 +98,7 @@ battleground --json | jq '.rankings[0]'
 | `battle-of-sexes` | Two players want to coordinate but disagree on which outcome is better. |
 | `public-goods` | Contributing helps everyone, but free-riding is individually optimal. |
 
-## Strategies (16 included)
+## Strategies (18 included)
 
 ### Classic
 - **Cooperator** — Always cooperates
@@ -118,6 +125,8 @@ battleground --json | jq '.rankings[0]'
 ### Advanced
 - **Prober** — Tests opponent, exploits if they're too forgiving
 - **Handshake** — Detects copies of itself via a specific opening sequence
+- **Tester** — Probes with 3 cooperative rounds, then exploits pure cooperators. Plays Tit-for-Tat otherwise.
+- **Lookahead** — Like Tit-for-Tat but checks last 3 rounds. Defects only if majority defected. Noise-resistant.
 
 ## Why?
 
