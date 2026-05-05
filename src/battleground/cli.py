@@ -5,7 +5,7 @@ import sys
 
 from .games import GAMES
 from .strategies import ALL_STRATEGIES, STRATEGY_MAP
-from .tournament import run_tournament, run_evolutionary
+from .tournament import play_match, run_tournament, run_evolutionary
 from .display import (
     display_header,
     display_rankings,
@@ -83,6 +83,12 @@ Examples:
         help="Show detailed match history for top N matchups (default: 0)",
     )
     parser.add_argument(
+        "--matchup",
+        type=str,
+        default=None,
+        help="Show full round-by-round detail for a specific matchup (e.g., \"Tit-for-Tat,Defector\")",
+    )
+    parser.add_argument(
         "--list-strategies",
         action="store_true",
         help="List all available strategies",
@@ -126,6 +132,56 @@ Examples:
 
     game = GAMES[args.game]
 
+    # Handle matchup flag
+    if args.matchup:
+        strat_pair = [s.strip() for s in args.matchup.split(",")]
+        if len(strat_pair) != 2:
+            print("  ❌ --matchup requires exactly two strategy names, comma-separated")
+            sys.exit(1)
+        for name in strat_pair:
+            if name not in STRATEGY_MAP:
+                print(f"  ❌ Unknown strategy: '{name}'")
+                print(f"  Available: {', '.join(STRATEGY_MAP.keys())}")
+                sys.exit(1)
+        # Run a single match between these two strategies
+        strat_a = STRATEGY_MAP[strat_pair[0]]()
+        strat_b = STRATEGY_MAP[strat_pair[1]]()
+        result = play_match(game, strat_a, strat_b, rounds=args.rounds, noise=args.noise)
+        if not args.json:
+            display_header(game, args.rounds, args.noise)
+            print(f"  🎯 MATCHUP: {result.strategy_a} vs {result.strategy_b}")
+            print()
+            display_match_detail(result)
+            # Summary
+            winner = result.winner
+            if winner:
+                print(f"  🏆 Winner: {winner} (score: {result.score_a} - {result.score_b})")
+            else:
+                print(f"  🤝 Draw: {result.score_a} - {result.score_b}")
+            print()
+        else:
+            import json
+            data = {
+                "game": args.game,
+                "matchup": [result.strategy_a, result.strategy_b],
+                "rounds": args.rounds,
+                "noise": args.noise,
+                "seed": args.seed,
+                "result": {
+                    "strategy_a": result.strategy_a,
+                    "strategy_b": result.strategy_b,
+                    "score_a": result.score_a,
+                    "score_b": result.score_b,
+                    "rounds": result.rounds,
+                    "history_a": [a.value for a in result.history_a],
+                    "history_b": [b.value for b in result.history_b],
+                },
+            }
+            print(json.dumps(data, indent=2))
+        return
+
+
+
     if args.evolve:
         # Evolutionary tournament
         if not args.json:
@@ -144,8 +200,15 @@ Examples:
 
         if args.json:
             import json
+            # Build payoff matrix for JSON
+            payoff_matrix = {}
+            for (a1, a2), payoff in game.payoff.items():
+                payoff_matrix[f"{a1.value},{a2.value}"] = {"player1": payoff.player1, "player2": payoff.player2}
+
             data = {
                 "game": args.game,
+                "game_description": game.description,
+                "payoff_matrix": payoff_matrix,
                 "generations": args.generations,
                 "population_size": args.population,
                 "rounds_per_match": args.rounds,
@@ -172,8 +235,15 @@ Examples:
 
         if args.json:
             import json
+            # Build payoff matrix for JSON
+            payoff_matrix = {}
+            for (a1, a2), payoff in game.payoff.items():
+                payoff_matrix[f"{a1.value},{a2.value}"] = {"player1": payoff.player1, "player2": payoff.player2}
+
             data = {
                 "game": args.game,
+                "game_description": game.description,
+                "payoff_matrix": payoff_matrix,
                 "rounds": args.rounds,
                 "noise": args.noise,
                 "seed": args.seed,
