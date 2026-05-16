@@ -81,6 +81,26 @@ battleground --strategies "Tit-for-Tat,Defector,Cooperator,Grim Trigger"
 battleground --json | jq '.rankings[0]'
 ```
 
+### CSV output
+
+Export tournament results to a spreadsheet:
+
+```bash
+battleground --csv                     # Round-robin rankings as CSV
+battleground --evolve --csv            # Evolutionary history as CSV
+battleground --csv > results.csv       # Save to file for Excel/Sheets
+```
+
+Round-robin CSV columns: `rank, name, avg_score, total_score, wins, losses, draws, cooperation_rate`
+Evolutionary CSV columns: `generation, dominant, StrategyName1, StrategyName2, ...` (one column per strategy)
+
+### Detailed head-to-head
+
+```bash
+battleground --matchup "Tit-for-Tat,Defector"                         # Terminal output
+battleground --matchup "Tit-for-Tat,Defector" --csv > tft-vs-defector.csv  # Round-by-round CSV
+```
+
 ### Reproducible results
 
 ```bash

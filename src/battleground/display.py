@@ -148,3 +148,62 @@ def display_game_list():
         print(f"  • {name:<22} — {game.description}")
         print(f"    {game.payoff_matrix_str()}")
         print()
+
+
+def output_csv_rankings(ranked: list[StrategyStats]) -> str:
+    """Output tournament rankings as CSV."""
+    import csv, io
+
+    buf = io.StringIO()
+    writer = csv.writer(buf)
+    writer.writerow(["rank", "name", "avg_score", "total_score", "wins", "losses", "draws", "cooperation_rate"])
+    for i, s in enumerate(ranked):
+        writer.writerow([i + 1, s.name, round(s.avg_score, 2), s.total_score, s.wins, s.losses, s.draws, round(s.cooperation_rate, 4)])
+    return buf.getvalue()
+
+
+def output_csv_evolution(history: list[dict]) -> str:
+    """Output evolutionary tournament history as CSV."""
+    import csv, io
+
+    # Collect all strategy names that appeared
+    all_strategies = set()
+    for gen in history:
+        all_strategies.update(gen["counts"].keys())
+    all_strategies = sorted(all_strategies)
+
+    buf = io.StringIO()
+    writer = csv.writer(buf)
+    writer.writerow(["generation", "dominant"] + all_strategies)
+    for gen in history:
+        row = [gen["generation"], gen.get("dominant", "?")]
+        row.extend(gen["counts"].get(s, 0) for s in all_strategies)
+        writer.writerow(row)
+    return buf.getvalue()
+
+
+def output_csv_matchup(result: "MatchResult", game: "Game | None" = None) -> str:
+    """Output a single match result as CSV (round by round).
+
+    If a game object is provided, per-round scores are computed from the payoff matrix.
+    """
+    import csv, io
+    from .games import Action
+
+    buf = io.StringIO()
+    writer = csv.writer(buf)
+    writer.writerow(["round", f"{result.strategy_a}_action", f"{result.strategy_b}_action", f"{result.strategy_a}_score", f"{result.strategy_b}_score"])
+
+    running_a = 0
+    running_b = 0
+    for r in range(result.rounds):
+        a = result.history_a[r]
+        b = result.history_b[r]
+
+        if game is not None:
+            payoff = game.get_payoff(a, b)
+            running_a += payoff.player1
+            running_b += payoff.player2
+
+        writer.writerow([r + 1, a.value, b.value, running_a, running_b])
+    return buf.getvalue()

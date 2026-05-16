@@ -13,6 +13,9 @@ from .display import (
     display_match_detail,
     display_strategy_list,
     display_game_list,
+    output_csv_rankings,
+    output_csv_evolution,
+    output_csv_matchup,
 )
 
 
@@ -104,6 +107,11 @@ Examples:
         help="Output results as JSON",
     )
     parser.add_argument(
+        "--csv",
+        action="store_true",
+        help="Output results as CSV",
+    )
+    parser.add_argument(
         "-s", "--seed",
         type=int,
         default=None,
@@ -147,7 +155,9 @@ Examples:
         strat_a = STRATEGY_MAP[strat_pair[0]]()
         strat_b = STRATEGY_MAP[strat_pair[1]]()
         result = play_match(game, strat_a, strat_b, rounds=args.rounds, noise=args.noise)
-        if not args.json:
+        if args.csv:
+            print(output_csv_matchup(result, game))
+        elif not args.json:
             display_header(game, args.rounds, args.noise)
             print(f"  🎯 MATCHUP: {result.strategy_a} vs {result.strategy_b}")
             print()
@@ -184,7 +194,7 @@ Examples:
 
     if args.evolve:
         # Evolutionary tournament
-        if not args.json:
+        if not args.json and not args.csv:
             display_header(game, args.rounds, args.noise)
             print("  🧬 Running evolutionary tournament...")
 
@@ -198,7 +208,9 @@ Examples:
             seed=args.seed,
         )
 
-        if args.json:
+        if args.csv:
+            print(output_csv_evolution(history))
+        elif args.json:
             import json
             # Build payoff matrix for JSON
             payoff_matrix = {}
@@ -221,7 +233,7 @@ Examples:
             display_evolution(history)
     else:
         # Round-robin tournament
-        if not args.json:
+        if not args.json and not args.csv:
             display_header(game, args.rounds, args.noise)
             print("  ⚔️  Running round-robin tournament...")
 
@@ -233,7 +245,9 @@ Examples:
             seed=args.seed,
         )
 
-        if args.json:
+        if args.csv:
+            print(output_csv_rankings(ranked))
+        elif args.json:
             import json
             # Build payoff matrix for JSON
             payoff_matrix = {}

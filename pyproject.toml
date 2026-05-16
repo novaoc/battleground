@@ -4,7 +4,7 @@ build-backend = "hatchling.build"
 
 [project]
 name = "battleground"
-version = "1.0.0"
+version = "1.1.0"
 description = "Game theory tournament simulator — run round-robin and evolutionary tournaments with classic strategies."
 readme = "README.md"
 license = "MIT"
